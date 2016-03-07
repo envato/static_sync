@@ -12,30 +12,18 @@ module StaticSync
     def initialize(config, storage = nil)
       @config  = config
       @storage = storage || StaticSync::Storage.new(config)
+      @skip    = []
     end
 
     def sync
-      log.info("Synching #{@config.local_directory} to #{@config.remote_directory}.") if @config.log
-      Dir.chdir(@config.local_directory) do
-        local_filtered_files.each do |file|
-          current_file = Uploadable.new(file, @config)
+      log_sync
+      each_uploadable_file do |uploadable_file|
+        next if @storage.has_version?(uploadable_file.version)
 
-          unless @storage.has_version?(current_file.version)
-            if @storage.has_file?(current_file.version)
-              handle_conflict(current_file)
-            else
-              log.info("Uploading #{file}") if @config.log
-            end
-            begin
-              @storage.create(current_file.headers)
-            rescue => error
-              log.error("Failed to upload #{file}")
-              raise error
-            end
-          end
-        end
+        look_for_conflicts(uploadable_file)
+
+        store_file(uploadable_file)
       end
-      log.info("Synching done.") if @config.log
     end
 
     def handle_conflict(file)
@@ -46,7 +34,14 @@ module StaticSync
         if file.cached?
           raise ConflictError, "modifications to existing cached files are not allowed."
         end
+      elsif @config.ignore_conflict?
+        @skip << file
+        log.info("#{file} already exist, skipping.") if @config.log
       end
+    end
+
+    def skip?(file)
+      @skip.include?(file)
     end
 
     def local_filtered_files
@@ -56,6 +51,35 @@ module StaticSync
     end
 
     private
+
+    def look_for_conflicts(file)
+      if @storage.has_file?(file.version)
+        handle_conflict(file)
+      else
+        log.info("Uploading #{ file }") if @config.log
+      end
+    end
+
+    def store_file(file)
+      return if skip?(file)
+      @storage.create(file.headers)
+    rescue => error
+      log.error("Failed to upload #{file}")
+      raise error
+    end
+
+    def log_sync
+      return unless @config.log
+      log.info("Synching #{@config.local_directory} to #{@config.remote_directory}.")
+    end
+
+    def each_uploadable_file
+      Dir.chdir(@config.local_directory) do
+        local_filtered_files.each do |file|
+          yield Uploadable.new(file, @config)
+        end
+      end
+    end
 
     def local_files
       Dir.glob("**/*.*").reject do |file|

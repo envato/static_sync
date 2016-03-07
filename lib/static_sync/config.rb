@@ -43,6 +43,10 @@ module StaticSync
       conflict_mode == 'fail_if_cached'
     end
 
+    def ignore_conflict?
+      conflict_mode == 'ignore_conflict'
+    end
+
     def load(path = '.static')
       content = '{}'
       begin

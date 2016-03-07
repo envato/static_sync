@@ -17,8 +17,8 @@ module StaticSync
     describe "#has_file?" do
 
       it "returns false by default" do
-        subject.has_file?(version_one).should be_false
-        subject.has_file?(version_two).should be_false
+        subject.has_file?(version_one).should be false
+        subject.has_file?(version_two).should be false
       end
 
       context "when an existing version of a file exists in the cache" do
@@ -26,7 +26,7 @@ module StaticSync
         let(:files) { [version_one] }
 
         it "returns true if the given version is the same" do
-          subject.has_file?(version_one).should be_true
+          subject.has_file?(version_one).should be true
         end
       end
     end
@@ -34,8 +34,8 @@ module StaticSync
     describe "#has_version?" do
 
       it "returns false by default" do
-        subject.has_version?(version_one).should be_false
-        subject.has_version?(version_two).should be_false
+        subject.has_version?(version_one).should be false
+        subject.has_version?(version_two).should be false
       end
 
       context "when an existing version of a file exists in the cache" do
@@ -43,11 +43,11 @@ module StaticSync
         let(:files) { [version_one] }
 
         it "returns false if the given version is different" do
-          subject.has_version?(version_two).should be_false
+          subject.has_version?(version_two).should be false
         end
 
         it "returns true if the given version is the same" do
-          subject.has_version?(version_one).should be_true
+          subject.has_version?(version_one).should be true
         end
       end
     end
@@ -55,8 +55,8 @@ module StaticSync
     describe "#has_conflict?" do
 
       it "returns false by default" do
-        subject.has_conflict?(version_one).should be_false
-        subject.has_conflict?(version_two).should be_false
+        subject.has_conflict?(version_one).should be false
+        subject.has_conflict?(version_two).should be false
       end
 
       context "when an existing version of a file exists in the cache" do
@@ -64,11 +64,11 @@ module StaticSync
         let(:files) { [version_one] }
 
         it "returns false when the given version is the same" do
-          subject.has_conflict?(version_one).should be_false
+          subject.has_conflict?(version_one).should be false
         end
 
         it "returns true when the given version is different" do
-          subject.has_conflict?(version_two).should be_true
+          subject.has_conflict?(version_two).should be true
         end
 
       end
