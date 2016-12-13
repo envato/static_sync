@@ -22,4 +22,5 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency('rspec', '~> 3.4')
   gem.add_development_dependency('timecop')
+  gem.add_development_dependency('rake')
 end
